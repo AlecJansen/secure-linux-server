@@ -54,3 +54,11 @@ We’ll soon implement:
 - Netdata integration for real-time monitoring
 
 Stay tuned, and star the repo if you like it :)
+
+
+
+
+
+Changes and new features
+_______________________
+6/1 Added email alert integration - Configured server to send email alerts via Gmail and 'msmtp' for critical events like SSH bans using 'Fail2Ban'. All email alert configuration setps can be found in 'alerts/email-alerts.md'.
