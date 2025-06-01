@@ -1,0 +1,3 @@
+WARNING: The following suspicious files and directories were found:
+WARNING: Possible Adore Worm installed:
+WARNING: Output from ifpromisc:

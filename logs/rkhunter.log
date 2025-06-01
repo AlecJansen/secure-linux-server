@@ -1,1 +1,14 @@
 Warning: The command '/usr/bin/lwp-request' has been replaced by a script: /usr/bin/lwp-request: Perl script text executable
+Warning: The following suspicious (large) shared memory segments have been found:
+         Process: /usr/libexec/mutter-x11-frames    PID: 7144    Owner: voyd    Size: 16MB (configured size allowed: 1.0MB)
+Warning: The SSH configuration option 'PermitRootLogin' has not been set.
+         The default value may be 'yes', to allow root access.
+Warning: Suspicious file types found in /dev:
+         /dev/shm/libpod_lock: data
+         /dev/shm/9334581e-7251-4ef7-a8ec-5bfe8e89ff68: data
+         /dev/shm/netdata_shm_cgroup_ebpf: data
+         /dev/shm/sem.netdata_sem_cgroup_ebpf: data
+Warning: Hidden directory found: /etc/.pihole
+Warning: Hidden file found: /etc/.resolv.conf.systemd-resolved.bak: ASCII text
+Warning: Hidden file found: /etc/.updated: ASCII text
+Warning: Hidden file found: /usr/share/man/man5/.containerignore.5.gz: symbolic link to containerignore.5.gz

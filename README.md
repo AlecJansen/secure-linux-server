@@ -43,36 +43,70 @@ The `setup.sh` script automates the initial hardening and configuration of your 
 
 > More functionality coming as this project grows!
 
+
+**Version:** 1.4.0  
+**Author:** AlecJansen
+
+## 🔐 Overview
+A lightweight, open-source bash framework to secure and harden a Linux server with minimal setup. Designed for sysadmins, hobbyists, and security-minded individuals.
+
+## ✅ Features
+- **System Updates & Hardened Defaults**
+- **Firewall (UFW)**: Deny-all, allow SSH, block the rest
+- **Fail2Ban**: Protects against brute-force attacks
+- **ClamAV**: Antivirus scanner with latest definitions
+- **RKHunter**: Rootkit detection
+- **chkrootkit**: Suspicious file & process scanner
+- **Lynis**: System config and audit hardening
+- **Kernel Module Hardening**: Prompt-based disablement of risky modules (NEW)
+- **Logging & Alerting**: Email-based daily reports with summaries and warnings
+- **Lightweight & Transparent**: No daemons or proprietary blobs
+
+## 📦 Installation
+```bash
+git clone https://github.com/alecjansen/secure-linux-server.git
+cd secure-linux-server
+chmod +x setup.sh
+./setup.sh
+```
+
+## 🛡️ Daily Scanning & Alerts
+Run this anytime or schedule with `cron`:
+```bash
+./alerts/scripts/notify.sh
+```
+
+## 📄 Version 1.4.0 Changes
+- [x] Added interactive kernel module hardening prompt
+- [x] User-friendly descriptions for each module
+- [x] Maintains blacklist in `/etc/modprobe.d/hardened-blacklist.conf`
+- [x] Refactored setup flow to include security context for choices
+
+## 🚀 Roadmap
+- Automatic cron integration (daily scans)
+- Optional telemetry (anonymous opt-in logging)
+- Docker/WSL support
+- Web dashboard for report viewing
+
+## 🧠 Philosophy
+Simple. Open. Transparent. Harden your system in minutes, understand exactly what it’s doing.
+
+## 📬 License
+MIT
+
+---
+*Pull requests welcome. Stay safe out there.*
+
+
+
 ## 🛠️ Contributing
 
 Feel free to fork and expand. PRs are welcome!
 
-## 📬 Alerts
-
-We’ll soon implement:
-- Email alerts via `msmtp`
 - Netdata integration for real-time monitoring
 
 Stay tuned, and star the repo if you like it :)
 
 
 
-
-
-Changes and new features
-_______________________
-0.16/1 Added email alert integration - Configured server to send email alerts via Gmail and 'msmtp' for critical events like SSH bans using 'Fail2Ban'. All email alert configuration setps can be found in 'alerts/email-alerts.md'.
-
-# Secure Linux Server Setup
-
-**Version: 1.2.0**  
-Last updated: June 1, 2025
-
-This project automates hardening and monitoring for a Linux server using tools like `ufw`, `fail2ban`, `rkhunter`, `lynis`, and email alerts.
-
-
-v1.0.0 – Initial setup with basic tools (ufw, fail2ban, rkhunter, lynis, etc.)
-v1.1.0 – Added notify.sh script and email alerts
-v1.2.0 – Added Lynis summaries in email, refactored logs and update behavior
-v1.3.0 - Added chrootkit support
 
