@@ -1,0 +1,47 @@
+
+[ Lynis 3.0.9 ]
+
+################################################################################
+  Lynis comes with ABSOLUTELY NO WARRANTY. This is free software, and you are
+  welcome to redistribute it under the terms of the GNU General Public License.
+  See the LICENSE file for details about using this software.
+
+  2007-2021, CISOfy - https://cisofy.com/lynis/
+  Enterprise support available (compliance, plugins, interface and tools)
+################################################################################
+
+
+[+] Initializing program
+------------------------------------
+- Detecting OS...  [ DONE ]
+- Checking profiles... [ DONE ]
+
+  ---------------------------------------------------
+  Program version:           3.0.9
+  Operating system:          Linux
+  Operating system name:     Ubuntu
+  Operating system version:  24.04
+  Kernel version:            6.8.0
+  Hardware platform:         x86_64
+  Hostname:                  voyd
+  ---------------------------------------------------
+  Profiles:                  /etc/lynis/default.prf
+  Log file:                  /var/log/lynis.log
+  Report file:               /var/log/lynis-report.dat
+  Report version:            1.0
+  Plugin directory:          /etc/lynis/plugins
+  ---------------------------------------------------
+  Auditor:                   [Not Specified]
+  Language:                  en
+  Test category:             all
+  Test group:                all
+  ---------------------------------------------------
+- Program update status...  [ NO UPDATE ]
+
+[+] System tools
+------------------------------------
+- Scanning available tools...
+- Checking system binaries...
+
+Interrupt detected.
+Cleaning up... [ DONE ]
