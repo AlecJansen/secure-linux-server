@@ -28,6 +28,7 @@ Secure the config file:
 chmod 600 ~/.msmtprc
 Test email delivery:
 echo "Test email from secure server" | mail -s "TEST ALERT" your-other-email@gmail.com
+
 🔐 Fail2Ban Integration
 Create custom action file
 File: /etc/fail2ban/action.d/custom-email.conf
@@ -46,6 +47,7 @@ backend = systemd
 action  = custom-email
 Restart Fail2Ban:
 sudo systemctl restart fail2ban
+
 📋 Logs & Debugging
 Check ~/.msmtp.log for delivery issues.
 Run fail2ban-client status to check jails.
