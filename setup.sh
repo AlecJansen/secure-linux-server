@@ -8,7 +8,7 @@ echo "[*] Updating system..."
 sudo apt update && sudo apt upgrade -y
 
 echo "[*] Installing core tools..."
-sudo apt install -y ufw fail2ban lynis rkhunter clamav unattended-upgrades mailutils msmtp
+sudo apt install -y ufw fail2ban lynis rkhunter clamav chkrootkit unattended-upgrades mailutils msmtp
 
 echo "[*] Enabling UFW and setting basic rules..."
 sudo ufw default deny incoming
@@ -19,6 +19,13 @@ sudo ufw enable
 echo "[*] Enabling and starting Fail2Ban..."
 sudo systemctl enable fail2ban
 sudo systemctl start fail2ban
+
+echo "[*] Copying fail2ban jail.local config..."
+sudo cp fail2ban/jail.local /etc/fail2ban/jail.local
+
+echo "[*] Restarting fail2ban service..."
+sudo systemctl restart fail2ban
+sudo systemctl enable fail2ban
 
 echo "[*] Updating rkhunter file properties database (first time only)..."
 sudo rkhunter --propupd -q

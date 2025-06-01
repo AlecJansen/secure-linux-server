@@ -48,3 +48,21 @@ cat "$RKHUNTER_LOG" | mail -s "Daily RKHunter Report" "$EMAIL" \
 } | mail -s "Daily Lynis Report" "$EMAIL" \
   && echo "Lynis report emailed successfully" \
   || echo "Failed to email Lynis report"
+
+CHKROOTKIT_LOG="$LOG_DIR/chkrootkit.log"
+CHKROOTKIT_WARNINGS="$LOG_DIR/chkrootkit_warnings.txt"
+
+echo "Starting chkrootkit scan..."
+sudo chkrootkit > "$CHKROOTKIT_LOG" 2>&1
+echo "chkrootkit scan complete."
+
+# Extract warnings or critical messages
+grep -i "WARNING:" "$CHKROOTKIT_LOG" > "$CHKROOTKIT_WARNINGS" || true
+
+if [[ -s "$CHKROOTKIT_WARNINGS" ]]; then
+  # If warnings exist, email them
+  mail -s "Daily chkrootkit Warnings" "$EMAIL" < "$CHKROOTKIT_WARNINGS"
+  echo "chkrootkit warnings emailed"
+else
+  echo "No chkrootkit warnings found, skipping email."
+fi

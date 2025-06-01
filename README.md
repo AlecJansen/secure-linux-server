@@ -74,5 +74,5 @@ This project automates hardening and monitoring for a Linux server using tools l
 v1.0.0 – Initial setup with basic tools (ufw, fail2ban, rkhunter, lynis, etc.)
 v1.1.0 – Added notify.sh script and email alerts
 v1.2.0 – Added Lynis summaries in email, refactored logs and update behavior
-
+v1.3.0 - Added chrootkit support
 
