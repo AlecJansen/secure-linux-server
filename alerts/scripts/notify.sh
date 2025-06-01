@@ -1,29 +1,50 @@
 #!/bin/bash
+# notify.sh - Runs rkhunter and lynis scans, then emails the reports
 
-# Directory to store logs
 LOG_DIR="$HOME/secure-linux-server/logs"
-
-# Log files
 RKHUNTER_LOG="$LOG_DIR/rkhunter.log"
 LYNIS_LOG="$LOG_DIR/lynis-report.txt"
-
-# Ensure log directory exists
-mkdir -p "$LOG_DIR"
-
-# Clear previous logs or create new empty files
-> "$RKHUNTER_LOG"
-> "$LYNIS_LOG"
-
-# Update rkhunter databases and run check
-sudo rkhunter --check --rwo > "$RKHUNTER_LOG"
-sudo rkhunter --check --sk --nocolors > "$LOG_DIR/rkhunter.log"
-
-
-# Run lynis audit in cronjob mode
-sudo lynis audit system --cronjob > "$LYNIS_LOG"
-
-# Send email alerts (replace with your actual recipient email)
 EMAIL="xc10397@aol.com"
 
-cat "$RKHUNTER_LOG" | mail -s "Daily RKHunter Report" "$EMAIL"
-cat "$LYNIS_LOG" | mail -s "Daily Lynis Report" "$EMAIL"
+mkdir -p "$LOG_DIR"
+
+# Clear previous logs
+: > "$RKHUNTER_LOG"
+: > "$LYNIS_LOG"
+
+echo "Starting rkhunter scan..."
+sudo rkhunter --check --rwo --quiet --nocolors > "$RKHUNTER_LOG" 2>&1
+echo "rkhunter scan complete."
+
+echo "Starting lynis scan..."
+sudo lynis audit system --cronjob > "$LYNIS_LOG" 2>&1
+echo "lynis scan complete."
+
+echo "RKHunter log size:" $(stat -c%s "$RKHUNTER_LOG")
+echo "Lynis log size:" $(stat -c%s "$LYNIS_LOG")
+
+# Extract Lynis summary block
+LYNIS_SUMMARY_BLOCK=$(awk '/\[ Lynis .* Results \]/{flag=1; print; next} /====/{flag=0} flag' "$LYNIS_LOG")
+
+# Fallback if no summary block was found
+if [[ -z "$LYNIS_SUMMARY_BLOCK" ]]; then
+  LYNIS_SUMMARY_BLOCK="No summary block found, or Lynis output format changed."
+fi
+
+# Email RKHunter full log
+cat "$RKHUNTER_LOG" | mail -s "Daily RKHunter Report" "$EMAIL" \
+  && echo "RKHunter report emailed successfully" \
+  || echo "Failed to email RKHunter report"
+
+# Email Lynis report with summary
+{
+  echo "Lynis Scan Summary:"
+  echo "-------------------"
+  echo "$LYNIS_SUMMARY_BLOCK"
+  echo
+  echo "Full Lynis Log:"
+  echo "--------------"
+  cat "$LYNIS_LOG"
+} | mail -s "Daily Lynis Report" "$EMAIL" \
+  && echo "Lynis report emailed successfully" \
+  || echo "Failed to email Lynis report"
