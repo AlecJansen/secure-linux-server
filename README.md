@@ -61,4 +61,18 @@ Stay tuned, and star the repo if you like it :)
 
 Changes and new features
 _______________________
-6/1 Added email alert integration - Configured server to send email alerts via Gmail and 'msmtp' for critical events like SSH bans using 'Fail2Ban'. All email alert configuration setps can be found in 'alerts/email-alerts.md'.
+0.16/1 Added email alert integration - Configured server to send email alerts via Gmail and 'msmtp' for critical events like SSH bans using 'Fail2Ban'. All email alert configuration setps can be found in 'alerts/email-alerts.md'.
+
+# Secure Linux Server Setup
+
+**Version: 1.2.0**  
+Last updated: June 1, 2025
+
+This project automates hardening and monitoring for a Linux server using tools like `ufw`, `fail2ban`, `rkhunter`, `lynis`, and email alerts.
+
+
+v1.0.0 – Initial setup with basic tools (ufw, fail2ban, rkhunter, lynis, etc.)
+v1.1.0 – Added notify.sh script and email alerts
+v1.2.0 – Added Lynis summaries in email, refactored logs and update behavior
+
+
