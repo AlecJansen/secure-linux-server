@@ -44,7 +44,7 @@ The `setup.sh` script automates the initial hardening and configuration of your 
 > More functionality coming as this project grows!
 
 
-**Version:** 1.4.0  
+**Version:** 1.6.0  
 **Author:** AlecJansen
 
 ## 🔐 Overview
@@ -75,6 +75,15 @@ Run this anytime or schedule with `cron`:
 ```bash
 ./alerts/scripts/notify.sh
 ```
+
+
+
+## 📄 Version 1.6.0 Changes
+- [x] Added strict shell options (`set -euo pipefail`) for failsafe execution
+- [x] Trap added to report line number on failure
+- [x] All setup output now logged to a dated file
+- [x] Suricata configuration now validates interface patching and warns on failure
+- [x] `notify.sh` revamped: parallel scanning, cleaner logic, `msmtp` email handling, temp log files, better reporting 
 
 ## 📄 Version 1.4.0 Changes
 - [x] Added interactive kernel module hardening prompt
