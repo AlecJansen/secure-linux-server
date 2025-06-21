@@ -60,30 +60,32 @@ Note: plugins have more extensive tests and may take several minutes to complete
 - Checking /usr/local/sbin...  [ FOUND ]
 - Authentication:
 - PAM (Pluggable Authentication Modules):
-  [WARNING]: Test DEB-0001 had a long execution: 16.554853 seconds
+  [WARNING]: Test DEB-0001 had a long execution: 15.525849 seconds
 - libpam-tmpdir [ Not Installed ]
 - File System Checks:
 - DM-Crypt, Cryptsetup & Cryptmount:
 - Checking / on /dev/sda3 [ NOT ENCRYPTED ]
 - Checking /snap/bare/5 on /var/lib/snapd/snaps/bare_5.snap [ NOT ENCRYPTED ]
-- Checking /snap/core22/1963 on /var/lib/snapd/snaps/core22_1963.snap [ NOT ENCRYPTED ]
 - Checking /snap/core18/2855 on /var/lib/snapd/snaps/core18_2855.snap [ NOT ENCRYPTED ]
-- Checking /snap/docker/3064 on /var/lib/snapd/snaps/docker_3064.snap [ NOT ENCRYPTED ]
+- Checking /snap/core18/2887 on /var/lib/snapd/snaps/core18_2887.snap [ NOT ENCRYPTED ]
+- Checking /snap/core22/1981 on /var/lib/snapd/snaps/core22_1981.snap [ NOT ENCRYPTED ]
+- Checking /snap/core22/2010 on /var/lib/snapd/snaps/core22_2010.snap [ NOT ENCRYPTED ]
+- Checking /snap/docker/3221 on /var/lib/snapd/snaps/docker_3221.snap [ NOT ENCRYPTED ]
+- Checking /snap/docker/3265 on /var/lib/snapd/snaps/docker_3265.snap [ NOT ENCRYPTED ]
+- Checking /snap/firefox/6259 on /var/lib/snapd/snaps/firefox_6259.snap [ NOT ENCRYPTED ]
+- Checking /snap/firefox/6316 on /var/lib/snapd/snaps/firefox_6316.snap [ NOT ENCRYPTED ]
 - Checking /snap/gnome-42-2204/202 on /var/lib/snapd/snaps/gnome-42-2204_202.snap [ NOT ENCRYPTED ]
 - Checking /snap/gtk-common-themes/1535 on /var/lib/snapd/snaps/gtk-common-themes_1535.snap [ NOT ENCRYPTED ]
-- Checking /snap/nextcloud/47611 on /var/lib/snapd/snaps/nextcloud_47611.snap [ NOT ENCRYPTED ]
 - Checking /snap/snapd/24505 on /var/lib/snapd/snaps/snapd_24505.snap [ NOT ENCRYPTED ]
-- Checking /snap/thunderbird/727 on /var/lib/snapd/snaps/thunderbird_727.snap [ NOT ENCRYPTED ]
-- Checking /snap/thunderbird/734 on /var/lib/snapd/snaps/thunderbird_734.snap [ NOT ENCRYPTED ]
+- Checking /snap/snapd/24718 on /var/lib/snapd/snaps/snapd_24718.snap [ NOT ENCRYPTED ]
+- Checking /snap/thunderbird/737 on /var/lib/snapd/snaps/thunderbird_737.snap [ NOT ENCRYPTED ]
+- Checking /snap/thunderbird/735 on /var/lib/snapd/snaps/thunderbird_735.snap [ NOT ENCRYPTED ]
 - Checking /boot on /dev/sda2 [ NOT ENCRYPTED ]
-- Checking /snap/firefox/6227 on /var/lib/snapd/snaps/firefox_6227.snap [ NOT ENCRYPTED ]
-- Checking /snap/nextcloud/48223 on /var/lib/snapd/snaps/nextcloud_48223.snap [ NOT ENCRYPTED ]
-- Checking /snap/firefox/6259 on /var/lib/snapd/snaps/firefox_6259.snap [ NOT ENCRYPTED ]
 - Software:
 - apt-listbugs [ Not Installed ]
 - apt-listchanges [ Not Installed ]
 - needrestart [ Installed ]
-- fail2ban [ Installed with jail.conf ]
+- fail2ban [ Installed with jail.local ]
 
 [+] Boot and services
 ------------------------------------
@@ -92,9 +94,9 @@ Note: plugins have more extensive tests and may take several minutes to complete
 - Checking presence GRUB2 [ FOUND ]
 - Checking for password protection [ NONE ]
 - Check running services (systemctl) [ DONE ]
-Result: found 55 running services
+Result: found 42 running services
 - Check enabled services at boot (systemctl) [ DONE ]
-Result: found 89 enabled services
+Result: found 80 enabled services
 - Check startup files (permissions) [ OK ]
 - Running 'systemd-analyze security'
 - ModemManager.service: [ MEDIUM ]
@@ -102,10 +104,9 @@ Result: found 89 enabled services
 - accounts-daemon.service: [ MEDIUM ]
 - alsa-state.service: [ UNSAFE ]
 - anacron.service: [ UNSAFE ]
-- avahi-daemon.service: [ UNSAFE ]
+- auditd.service: [ EXPOSED ]
 - blueman-mechanism.service: [ UNSAFE ]
-- bluetooth.service: [ MEDIUM ]
-- clamav-freshclam.service: [ UNSAFE ]
+- clamd-root.service: [ UNSAFE ]
 - cockpit-wsinstance-http.service: [ UNSAFE ]
 - cockpit.service: [ MEDIUM ]
 - colord.service: [ PROTECTED ]
@@ -117,9 +118,10 @@ Result: found 89 enabled services
 - docker.service: [ UNSAFE ]
 - emergency.service: [ UNSAFE ]
 - fail2ban.service: [ UNSAFE ]
-- fwupd.service: [ EXPOSED ]
+- fancontrol.service: [ UNSAFE ]
 - gdm.service: [ UNSAFE ]
 - getty@tty1.service: [ UNSAFE ]
+- i8kmon.service: [ UNSAFE ]
 - iscsid.service: [ UNSAFE ]
 - kerneloops.service: [ UNSAFE ]
 - libvirtd.service: [ UNSAFE ]
@@ -131,20 +133,7 @@ Result: found 89 enabled services
 - ollama.service: [ UNSAFE ]
 - open-vm-tools.service: [ UNSAFE ]
 - php8.3-fpm.service: [ UNSAFE ]
-- plexmediaserver.service: [ UNSAFE ]
 - plymouth-start.service: [ UNSAFE ]
-- pmcd.service: [ UNSAFE ]
-- pmie.service: [ UNSAFE ]
-- pmie_check.service: [ UNSAFE ]
-- pmie_daily.service: [ UNSAFE ]
-- pmie_farm.service: [ UNSAFE ]
-- pmie_farm_check.service: [ UNSAFE ]
-- pmlogger.service: [ UNSAFE ]
-- pmlogger_check.service: [ UNSAFE ]
-- pmlogger_daily.service: [ UNSAFE ]
-- pmlogger_farm.service: [ UNSAFE ]
-- pmlogger_farm_check.service: [ UNSAFE ]
-- pmproxy.service: [ UNSAFE ]
 - podman.service: [ UNSAFE ]
 - polkit.service: [ PROTECTED ]
 - rc-local.service: [ UNSAFE ]
@@ -152,16 +141,9 @@ Result: found 89 enabled services
 - rsyslog.service: [ MEDIUM ]
 - rtkit-daemon.service: [ MEDIUM ]
 - snap.docker.dockerd.service: [ UNSAFE ]
-- snap.nextcloud.apache.service: [ UNSAFE ]
-- snap.nextcloud.logrotate.service: [ UNSAFE ]
-- snap.nextcloud.mysql.service: [ UNSAFE ]
-- snap.nextcloud.nextcloud-cron.service: [ UNSAFE ]
-- snap.nextcloud.nextcloud-fixer.service: [ UNSAFE ]
-- snap.nextcloud.php-fpm.service: [ UNSAFE ]
-- snap.nextcloud.redis-server.service: [ UNSAFE ]
-- snap.nextcloud.renew-certs.service: [ UNSAFE ]
 - snapd.service: [ UNSAFE ]
 - ssh.service: [ UNSAFE ]
+- suricata.service: [ UNSAFE ]
 - systemd-ask-password-console.service: [ UNSAFE ]
 - systemd-ask-password-plymouth.service: [ UNSAFE ]
 - systemd-ask-password-wall.service: [ UNSAFE ]
@@ -201,15 +183,15 @@ CPU support: PAE and/or NoeXecute supported [ FOUND ]
 - Checking kernel version and release [ DONE ]
 - Checking kernel type [ DONE ]
 - Checking loaded kernel modules [ DONE ]
-Found 192 active modules
+Found 181 active modules
 - Checking Linux kernel configuration file [ FOUND ]
 - Checking default I/O kernel scheduler [ NOT FOUND ]
 - Checking for available kernel update [ OK ]
 - Checking core dumps configuration
 - configuration in systemd conf files [ DEFAULT ]
 - configuration in /etc/profile [ DEFAULT ]
-- 'hard' configuration in /etc/security/limits.conf [ DEFAULT ]
-- 'soft' configuration in /etc/security/limits.conf [ DEFAULT ]
+- 'hard' configuration in /etc/security/limits.conf [ DISABLED ]
+- 'soft' config in /etc/security/limits.conf (implicit) [ DISABLED ]
 - Checking setuid core dumps configuration [ PROTECTED ]
 - Check if reboot is needed [ NO ]
 
@@ -284,13 +266,13 @@ Result: found 9 shells (valid shells: 9).
 - Mount options of /dev [ PARTIALLY HARDENED ]
 - Mount options of /dev/shm [ PARTIALLY HARDENED ]
 - Mount options of /run [ HARDENED ]
-- Total without nodev:8 noexec:26 nosuid:19 ro or noexec (W^X): 13 of total 43
+- Total without nodev:6 noexec:26 nosuid:19 ro or noexec (W^X): 11 of total 42
 - Checking Locate database [ FOUND ]
 - Disable kernel support of some filesystems
 
 [+] USB Devices
 ------------------------------------
-- Checking usb-storage driver (modprobe config) [ NOT DISABLED ]
+- Checking usb-storage driver (modprobe config) [ DISABLED ]
 - Checking USB devices authorization [ ENABLED ]
 - Checking USBGuard [ NOT FOUND ]
 
@@ -339,11 +321,11 @@ Nameserver: 8.8.8.8 [ OK ]
 - DNSSEC supported (systemd-resolved) [ UNKNOWN ]
 - Checking default gateway [ DONE ]
 - Getting listening ports (TCP/UDP) [ DONE ]
-- Checking promiscuous interfaces [ OK ]
+- Checking promiscuous interfaces [ WARNING ]
 - Checking waiting connections [ OK ]
 - Checking status DHCP client
 - Checking for ARP monitoring software [ NOT FOUND ]
-- Uncommon network protocols [ 0 ]
+- Uncommon network protocols [ NOT FOUND ]
 
 [+] Printers and Spools
 ------------------------------------
@@ -407,26 +389,6 @@ ModSecurity: web application firewall [ NOT FOUND ]
 [+] Databases
 ------------------------------------
 - MySQL process status [ FOUND ]
-- Redis (server) status [ FOUND ]
-
-=================================================================
-
-  Exception found!
-
-  Function/test:  [DBS-1882]
-  Message:        Found Redis, but no configuration file. Report this if you know where it is located on your system.
-
-  Help improving the Lynis community with your feedback!
-
-  Steps:
-  - Ensure you are running the latest version (/usr/sbin/lynis update check)
-  - If so, create a GitHub issue at https://github.com/CISOfy/lynis
-  - Include relevant parts of the log file or configuration file
-
-  Thanks!
-
-=================================================================
-
 
 [+] LDAP Services
 ------------------------------------
@@ -482,20 +444,23 @@ ModSecurity: web application firewall [ NOT FOUND ]
 
 [+] Accounting
 ------------------------------------
-- Checking accounting information [ NOT FOUND ]
+- Checking accounting information [ OK ]
 - Checking sysstat accounting data [ DISABLED ]
-- Checking auditd [ NOT FOUND ]
+- Checking auditd [ ENABLED ]
+- Checking audit rules [ SUGGESTION ]
+- Checking audit configuration file [ OK ]
+- Checking auditd log file [ FOUND ]
 
 [+] Time and Synchronization
 ------------------------------------
 - NTP daemon found: systemd (timesyncd) [ FOUND ]
 - Checking for a running NTP daemon or client [ OK ]
-- Last time synchronization [ 162s ]
+- Last time synchronization [ 1661s ]
 
 [+] Cryptography
 ------------------------------------
 - Checking for expired SSL certificates [0/151] [ NONE ]
-  [WARNING]: Test CRYP-7902 had a long execution: 27.401549 seconds
+  [WARNING]: Test CRYP-7902 had a long execution: 27.086342 seconds
 - Found 0 encrypted and 1 unencrypted swap devices in use. [ OK ]
 - Kernel entropy is sufficient [ YES ]
 - HW RNG & rngd [ NO ]
@@ -519,7 +484,7 @@ ModSecurity: web application firewall [ NOT FOUND ]
 ------------------------------------
 - Checking presence AppArmor [ FOUND ]
 - Checking AppArmor status [ ENABLED ]
-Found 193 unconfined processes
+Found 137 unconfined processes
 - Checking presence SELinux [ NOT FOUND ]
 - Checking presence TOMOYO Linux [ NOT FOUND ]
 - Checking presence grsecurity [ NOT FOUND ]
@@ -537,8 +502,9 @@ Found 193 unconfined processes
 - Checking automation tooling
 - Automation tooling [ NOT FOUND ]
 - Checking presence of Fail2ban [ FOUND ]
-2025-06-01 13:44:39,271 fail2ban.configreader   [3007815]: WARNING 'allowipv6' not defined in 'Definition'. Using default one: 'auto'
+2025-06-21 03:06:34,094 fail2ban.configreader   [467919]: WARNING 'allowipv6' not defined in 'Definition'. Using default one: 'auto'
 - Checking Fail2ban jails [ ENABLED ]
+- Checking Suricata status [ RUNNING ]
 - Checking for IDS/IPS tooling [ FOUND ]
 
 [+] Software: Malware
@@ -637,9 +603,14 @@ Directory: /etc/cron.monthly [ SUGGESTION ]
 
   -[ Lynis 3.0.9 Results ]-
 
-  Great, no warnings
+  Warnings (1):
+  ----------------------------
+  ! Found promiscuous interface [NETW-3015] 
+    - Details  : wlp3s0
+    - Solution : Determine if this mode is required or whitelist interface in profile
+      https://cisofy.com/lynis/controls/NETW-3015/
 
-  Suggestions (52):
+  Suggestions (44):
   ----------------------------
   * This release is more than 4 months old. Check the website or GitHub to see if there is an update available. [LYNIS] 
       https://cisofy.com/lynis/controls/LYNIS/
@@ -653,18 +624,12 @@ Directory: /etc/cron.monthly [ SUGGESTION ]
   * Install apt-listchanges to display any significant changes prior to any upgrade via APT. [DEB-0811] 
       https://cisofy.com/lynis/controls/DEB-0811/
 
-  * Copy /etc/fail2ban/jail.conf to jail.local to prevent it being changed by updates. [DEB-0880] 
-      https://cisofy.com/lynis/controls/DEB-0880/
-
   * Set a password on GRUB boot loader to prevent altering boot configuration (e.g. boot in single user mode without password) [BOOT-5122] 
       https://cisofy.com/lynis/controls/BOOT-5122/
 
   * Consider hardening system services [BOOT-5264] 
     - Details  : Run '/usr/bin/systemd-analyze security SERVICE' for each service
       https://cisofy.com/lynis/controls/BOOT-5264/
-
-  * If not required, consider explicit disabling of core dump in /etc/security/limits.conf file [KRNL-5820] 
-      https://cisofy.com/lynis/controls/KRNL-5820/
 
   * Check PAM configuration, add rounds if applicable and expire passwords to encrypt with new values [AUTH-9229] 
       https://cisofy.com/lynis/controls/AUTH-9229/
@@ -699,13 +664,10 @@ Directory: /etc/cron.monthly [ SUGGESTION ]
   * To decrease the impact of a full /var file system, place /var on a separate partition [FILE-6310] 
       https://cisofy.com/lynis/controls/FILE-6310/
 
-  * Disable drivers like USB storage when not used, to prevent unauthorized storage or data theft [USB-1000] 
-      https://cisofy.com/lynis/controls/USB-1000/
-
   * Check DNS configuration for the dns domain name [NAME-4028] 
       https://cisofy.com/lynis/controls/NAME-4028/
 
-  * Purge old/removed packages (16 found) with aptitude purge or dpkg --purge command. This will cleanup old configuration files, cron jobs and startup scripts. [PKGS-7346] 
+  * Purge old/removed packages (22 found) with aptitude purge or dpkg --purge command. This will cleanup old configuration files, cron jobs and startup scripts. [PKGS-7346] 
       https://cisofy.com/lynis/controls/PKGS-7346/
 
   * Install debsums utility for the verification of packages with known good database. [PKGS-7370] 
@@ -713,18 +675,6 @@ Directory: /etc/cron.monthly [ SUGGESTION ]
 
   * Install package apt-show-versions for patch management purposes [PKGS-7394] 
       https://cisofy.com/lynis/controls/PKGS-7394/
-
-  * Determine if protocol 'dccp' is really needed on this system [NETW-3200] 
-      https://cisofy.com/lynis/controls/NETW-3200/
-
-  * Determine if protocol 'sctp' is really needed on this system [NETW-3200] 
-      https://cisofy.com/lynis/controls/NETW-3200/
-
-  * Determine if protocol 'rds' is really needed on this system [NETW-3200] 
-      https://cisofy.com/lynis/controls/NETW-3200/
-
-  * Determine if protocol 'tipc' is really needed on this system [NETW-3200] 
-      https://cisofy.com/lynis/controls/NETW-3200/
 
   * Check iptables rules to see which rules are currently not used [FIRE-4513] 
       https://cisofy.com/lynis/controls/FIRE-4513/
@@ -783,14 +733,11 @@ Directory: /etc/cron.monthly [ SUGGESTION ]
   * Add legal banner to /etc/issue.net, to warn unauthorized users [BANN-7130] 
       https://cisofy.com/lynis/controls/BANN-7130/
 
-  * Enable process accounting [ACCT-9622] 
-      https://cisofy.com/lynis/controls/ACCT-9622/
-
   * Enable sysstat to collect accounting (disabled) [ACCT-9626] 
       https://cisofy.com/lynis/controls/ACCT-9626/
 
-  * Enable auditd to collect audit information [ACCT-9628] 
-      https://cisofy.com/lynis/controls/ACCT-9628/
+  * Audit daemon is enabled with an empty ruleset. Disable the daemon or define rules [ACCT-9630] 
+      https://cisofy.com/lynis/controls/ACCT-9630/
 
   * Install a file integrity tool to monitor changes to critical and sensitive files [FINT-4350] 
       https://cisofy.com/lynis/controls/FINT-4350/
@@ -821,8 +768,8 @@ Directory: /etc/cron.monthly [ SUGGESTION ]
 
   Lynis security scan details:
 
-  Hardening index : 64 [############        ]
-  Tests performed : 273
+  Hardening index : 65 [#############       ]
+  Tests performed : 275
   Plugins enabled : 1
 
   Components:
@@ -840,15 +787,6 @@ Directory: /etc/cron.monthly [ SUGGESTION ]
   Files:
   - Test and debug information      : /var/log/lynis.log
   - Report data                     : /var/log/lynis-report.dat
-
-================================================================================
-
-  Exceptions found
-  Some exceptional events or information was found!
-
-  What to do:
-  You can help by providing your log file (/var/log/lynis.log).
-  Go to https://cisofy.com/contact/ and send your file to the e-mail address listed
 
 ================================================================================
 

@@ -19,8 +19,8 @@ logfile        ~/.msmtp.log
 account        gmail
 host           smtp.gmail.com
 port           587
-from           your.email@gmail.com
-user           your.email@gmail.com
+from           alecjansen1@gmail.com
+user           alecjansen1@gmail.com
 password       your_app_password_here
 
 account default : gmail
@@ -33,10 +33,10 @@ echo "Test email from secure server" | mail -s "TEST ALERT" your-other-email@gma
 Create custom action file
 File: /etc/fail2ban/action.d/custom-email.conf
 [Definition]
-actionstart = echo "[Fail2Ban] Jail started: <name>" | mail -s "[Fail2Ban] <name> Started" your.email@gmail.com
-actionstop  = echo "[Fail2Ban] Jail stopped: <name>" | mail -s "[Fail2Ban] <name> Stopped" your.email@gmail.com
-actionban   = echo "[Fail2Ban] Banned IP <ip> from <name>" | mail -s "[Fail2Ban] <name>: Banned <ip>" your.email@gmail.com
-actionunban = echo "[Fail2Ban] Unbanned IP <ip> from <name>" | mail -s "[Fail2Ban] <name>: Unbanned <ip>" your.email@gmail.com
+actionstart = echo "[Fail2Ban] Jail started: <name>" | mail -s "[Fail2Ban] <name> Started" alecjansen1@gmail.com
+actionstop  = echo "[Fail2Ban] Jail stopped: <name>" | mail -s "[Fail2Ban] <name> Stopped" alecjansen1@gmail.com
+actionban   = echo "[Fail2Ban] Banned IP <ip> from <name>" | mail -s "[Fail2Ban] <name>: Banned <ip>" alecjansen1@gmail.com
+actionunban = echo "[Fail2Ban] Unbanned IP <ip> from <name>" | mail -s "[Fail2Ban] <name>: Unbanned <ip>" alecjansen1@gmail.com
 Update jail configuration:
 File: /etc/fail2ban/jail.local
 [sshd]

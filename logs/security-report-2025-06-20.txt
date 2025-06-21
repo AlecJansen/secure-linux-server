@@ -1,0 +1,16 @@
+========== Daily Security Report - 2025-06-20 ==========
+
+[ RKHunter Warnings ]
+sudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper
+sudo: a password is required
+
+[ Lynis Summary ]
+No summary block found, or Lynis output format changed.
+
+[ Full Lynis Log ]
+sudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper
+sudo: a password is required
+
+[ chkrootkit Warnings / Full Log ]
+sudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper
+sudo: a password is required

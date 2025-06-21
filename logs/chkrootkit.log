@@ -93,7 +93,7 @@ WARNING: The following suspicious files and directories were found:
 /usr/lib/python3/dist-packages/fail2ban/tests/files/config/apache-auth/digest_wrongrelm/.htpasswd
 /usr/lib/python3/dist-packages/fail2ban/tests/files/config/apache-auth/digest/.htaccess
 /usr/lib/python3/dist-packages/fail2ban/tests/files/config/apache-auth/digest/.htpasswd
-/usr/lib/modules/6.8.0-59-generic/vdso/.build-id
+/usr/lib/modules/6.8.0-62-generic/vdso/.build-id
 /usr/lib/modules/6.8.0-60-generic/vdso/.build-id
 /usr/lib/debug/.build-id
 
@@ -102,11 +102,7 @@ Searching for Ramen Worm rootkit...                         not found
 Searching for Maniac rootkit...                             not found
 Searching for RK17 rootkit...                               not found
 Searching for Ducoci rootkit...                             not found
-Searching for Adore Worm...                                 WARNING
-
-WARNING: Possible Adore Worm installed:
-/usr/lib/plexmediaserver/Resources/start.sh
-
+Searching for Adore Worm...                                 not found
 Searching for ShitC Worm...                                 not found
 Searching for Omega Worm...                                 not found
 Searching for Sadmind/IIS Worm...                           not found
@@ -174,7 +170,7 @@ Checking `sniffer'...                                       WARNING
 
 WARNING: Output from ifpromisc:
 lo: not promisc and no packet sniffer sockets
-wlp3s0: PACKET SNIFFER(/usr/sbin/NetworkManager[1152], /usr/sbin/wpa_supplicant[1153])
+wlp3s0: PACKET SNIFFER(/usr/bin/suricata[2257], /usr/bin/suricata[2257], /usr/bin/suricata[2257], /usr/bin/suricata[2257], /usr/sbin/NetworkManager[1085], /usr/sbin/wpa_supplicant[1087])
 docker0: not promisc and no packet sniffer sockets
 
 Checking `w55808'...                                        not found

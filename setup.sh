@@ -29,7 +29,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo -e "${BLUE}"
 echo "   ____                  _             _                "
 echo "  / ___|  ___ _ ____   _(_) ___ ___   / \\   ___ ___ ___ "
-echo "  \\___ \\ / _ \\ '__\\ \\ / / |/ __/ _ \\ / _ \\ / __/ __/ _ \\\" 
+echo "  \\___ \\ / _ \\ '__\\ \\ / / |/ __/ _ \\ / _ \\ / __/ __/ _ \\" 
 echo "   ___) |  __/ |   \\ V /| | (_|  __// ___ \\ (_| (_|  __/"
 echo "  |____/ \\___|_|    \\_/ |_|\\___\\___/_/   \\_\\___\\___\\___|"
 echo -e "${NC}"
@@ -48,72 +48,51 @@ if [[ "$update_choice" =~ ^[Yy]$ ]]; then
   apt update && apt upgrade -y
 fi
 
-TOOLS=(ufw fail2ban lynis rkhunter clamav chkrootkit unattended-upgrades mailutils msmtp suricata jq)
-INSTALL_LIST=()
+# Install essential tools
+tools=(ufw fail2ban lynis rkhunter clamav chkrootkit unattended-upgrades mailutils msmtp)
+echo -e "${BLUE}[*] Installing required packages...${NC}"
+apt install -y "${tools[@]}"
 
-for tool in "${TOOLS[@]}"; do
-  read -p "[*] Install $tool? (y/n): " choice
-  if [[ "$choice" =~ ^[Yy]$ ]]; then
-    INSTALL_LIST+=("$tool")
-  fi
-done
+# UFW Setup
+echo -e "${BLUE}[*] Configuring UFW...${NC}"
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow ssh
+ufw --force enable
 
-if [[ ${#INSTALL_LIST[@]} -gt 0 ]]; then
-  echo -e "${BLUE}[*] Installing selected tools: ${INSTALL_LIST[*]}${NC}"
-  apt install -y "${INSTALL_LIST[@]}"
+# Fail2Ban Setup
+echo -e "${BLUE}[*] Enabling Fail2Ban...${NC}"
+systemctl enable --now fail2ban
+
+# Optional jail.local copy
+if [[ -f "$SCRIPT_DIR/fail2ban/jail.local" ]]; then
+  echo -e "${BLUE}[*] Copying jail.local config...${NC}"
+  cp "$SCRIPT_DIR/fail2ban/jail.local" /etc/fail2ban/jail.local
+  systemctl restart fail2ban
 fi
 
-contains_tool() {
-  printf '%s\n' "${INSTALL_LIST[@]}" | grep -qx "$1"
-}
+# RKHunter Setup
+echo -e "${BLUE}[*] Updating RKHunter properties database...${NC}"
+rkhunter --propupd -q || true
 
-# Remaining configuration steps follow unchanged...
-# [UFW, Fail2Ban, RKHunter, ClamAV setup logic continues here]
+# ClamAV DB Update
+echo -e "${BLUE}[*] Updating ClamAV virus database...${NC}"
+freshclam || true
 
-if contains_tool "suricata"; then
-  echo -e "${BLUE}[*] Configuring Suricata...${NC}"
-  mkdir -p /var/log/suricata
-  chown suricata:suricata /var/log/suricata
+# Ensure log directory exists
+mkdir -p "$HOME/secure-linux-server/logs"
 
-  DETECTED_IFACE=$(ip -brief address show | awk '/UP/ && !/lo/ {print $1; exit}')
-  echo -e "Detected network interface: ${YELLOW}$DETECTED_IFACE${NC}"
-  read -p "[*] Use this interface for Suricata? (y/n): " use_iface
-  if [[ "$use_iface" =~ ^[Yy]$ ]]; then
-    INTERFACE="$DETECTED_IFACE"
-  else
-    read -p "Enter the desired network interface name: " INTERFACE
-  fi
+# Setup notify.sh without overwriting existing one
+NOTIFY_SRC="$SCRIPT_DIR/alerts/scripts/notify.sh"
+NOTIFY_DEST="$HOME/secure-linux-server/alerts/scripts/notify.sh"
 
-  cp /etc/suricata/suricata.yaml /etc/suricata/suricata.yaml.bak
-
-  echo -e "${BLUE}[*] Patching Suricata interface config...${NC}"
-  awk -v iface="$INTERFACE" '
-    BEGIN {in_afpacket=0}
-    /^af-packet:/ {print; in_afpacket=1; next}
-    in_afpacket == 1 && /^\s*- interface:/ { next }
-    in_afpacket == 1 && /^\S/ {
-      in_afpacket=0
-      print "  - interface: " iface
-      print "    threads: auto"
-      print "    promisc: true"
-      print "    cluster-id: 99"
-      print "    cluster-type: cluster_flow"
-      print "    defrag: yes"
-    }
-    { if (in_afpacket != 1) print }
-  ' /etc/suricata/suricata.yaml.bak > /etc/suricata/suricata.yaml
-
-  if ! grep -q "$INTERFACE" /etc/suricata/suricata.yaml; then
-    echo -e "${RED}[!] Warning: Suricata interface not patched correctly. Check configuration.${NC}"
-  fi
-
-  echo -e "${BLUE}[*] Validating Suricata config...${NC}"
-  if suricata -T -c /etc/suricata/suricata.yaml -v; then
-    echo -e "${GREEN}[✓] Config valid. Restarting Suricata...${NC}"
-    systemctl stop suricata
-    sleep 1
-    systemctl start suricata && echo -e "${GREEN}[+] Suricata started successfully.${NC}" || echo -e "${RED}[!] Failed to start Suricata. Check system logs.${NC}"
-  else
-    echo -e "${RED}[!] Suricata config invalid. Check /etc/suricata/suricata.yaml.${NC}"
-  fi
+if [[ -f "$NOTIFY_DEST" ]]; then
+  echo -e "${YELLOW}[!] notify.sh already exists, skipping copy.${NC}"
+else
+  mkdir -p "$(dirname "$NOTIFY_DEST")"
+  cp "$NOTIFY_SRC" "$NOTIFY_DEST"
+  chmod +x "$NOTIFY_DEST"
+  echo -e "${GREEN}[+] notify.sh installed to $NOTIFY_DEST${NC}"
 fi
+
+echo -e "\n${GREEN}[✓] Setup complete.${NC}"
