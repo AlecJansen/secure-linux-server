@@ -1,8 +1,0 @@
-Warning: The command '/usr/bin/lwp-request' has been replaced by a script: /usr/bin/lwp-request: Perl script text executable
-Warning: Suspicious file types found in /dev:
-         /dev/shm/sem.netdata_sem_cgroup_ebpf: data
-         /dev/shm/netdata_shm_cgroup_ebpf: data
-         /dev/shm/libpod_lock: data
-Warning: Hidden directory found: /etc/.pihole
-Warning: Hidden file found: /etc/.updated: ASCII text
-Warning: Hidden file found: /usr/share/man/man5/.containerignore.5.gz: symbolic link to containerignore.5.gz
