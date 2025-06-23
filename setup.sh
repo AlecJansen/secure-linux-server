@@ -31,16 +31,36 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Utility functions
+prompt_yes_no() {
+  local prompt="$1"
+  read -p "$prompt (y/n): " choice
+  [[ "$choice" =~ ^[Yy]$ ]]
+}
+
+init_summary() {
+  declare -gA summary
+  summary["System Upgrade"]="Skipped"
+  summary["Firewall"]="Skipped"
+  summary["Fail2Ban"]="Skipped"
+  summary["RKHunter DB Init"]="Skipped"
+  summary["Clamd"]="Not Enabled"
+  summary["MTA Setup"]="Not Configured"
+  summary["Lynis Audit"]="Skipped"
+  summary["notify.sh"]="Not Installed"
+}
+
 # ASCII Header
 echo -e "${BLUE}"
-echo "   ____                  _             _                "
-echo "  / ___|  ___ _ ____   _(_) ___ ___   / \\   ___ ___ ___ "
-echo "  \\___ \\ / _ \\ '__\\ \\ / / |/ __/ _ \\ / _ \\ / __/ __/ _ \\"
-echo "   ___) |  __/ |   \\ V /| | (_|  __// ___ \\ (_| (_|  __/"
-echo "  |____/ \\___|_|    \\_/ |_|\\___\\___/_/   \\_\\___\\___\\___|"
+echo "  ____                  _             _            "
+echo " / ___|  ___ _ ____   _(_) ___ ___   / \\   ___ ___ "
+echo " \\___ \\ / _ \\ '__\\ \\ / / |/ __/ _ \\ / _ \\ / __/ _ \\"
+echo "  ___) |  __/ |   \\ V /| | (_|  __// ___ \\ (_|  __/"
+echo " |____/ \\___|_|    \\_/ |_|\\___\\___/_/   \\_\\___\\___/"
 echo -e "${NC}"
 echo -e "${YELLOW}Welcome to the Secure Linux Server Setup Script!${NC}"
 echo
+
 
 # Connectivity check
 if ! ping -c1 1.1.1.1 >/dev/null 2>&1; then
@@ -48,31 +68,37 @@ if ! ping -c1 1.1.1.1 >/dev/null 2>&1; then
   exit 1
 fi
 
-# Feature toggles
-declare -A summary
-summary["System Upgrade"]="Skipped"
-summary["Firewall"]="Skipped"
-summary["Fail2Ban"]="Skipped"
-summary["RKHunter DB Init"]="Skipped"
-summary["Clamd"]="Not Enabled"
-summary["clamdscan Test"]="Not Run"
-summary["Lynis Audit"]="Skipped"
-summary["notify.sh"]="Not Installed"
+# Initialize summary
+init_summary
 
-read -p "[*] Proceed with system update and upgrade? (y/n): " upgrade
-if [[ "$upgrade" =~ ^[Yy]$ ]]; then
+# Upgrade system
+if prompt_yes_no "[*] Proceed with system update and upgrade?"; then
   apt-get update && apt-get upgrade -y
   summary["System Upgrade"]="✓"
 fi
 
 # Install essentials
-tools=(ufw fail2ban lynis rkhunter clamav chkrootkit unattended-upgrades mailutils msmtp)
+tools=(ufw fail2ban lynis rkhunter clamav clamav-daemon chkrootkit unattended-upgrades mailutils msmtp)
 echo -e "${BLUE}[*] Installing required packages...${NC}"
-apt-get install -y "${tools[@]}"
+to_install=()
+for pkg in "${tools[@]}"; do
+  dpkg -s "$pkg" &>/dev/null || to_install+=("$pkg")
+done
+[[ ${#to_install[@]} -gt 0 ]] && apt-get install -y "${to_install[@]}"
+
+# Configure MTA (msmtp)
+if command -v msmtp &>/dev/null; then
+  echo -e "${BLUE}[*] Configuring msmtp as the system MTA...${NC}"
+  update-alternatives --install /usr/sbin/sendmail mta /usr/bin/msmtp 10
+  update-alternatives --set mta /usr/bin/msmtp
+  echo -e "${GREEN}[✓] msmtp configured as default MTA${NC}"
+  summary["MTA Setup"]="✓"
+else
+  echo -e "${YELLOW}[!] msmtp not found, skipping MTA configuration${NC}"
+fi
 
 # UFW
-read -p "[*] Enable UFW with SSH allowed and default rules? (y/n): " ufw_choice
-if [[ "$ufw_choice" =~ ^[Yy]$ ]]; then
+if prompt_yes_no "[*] Enable UFW with SSH allowed and default rules?"; then
   ufw default deny incoming
   ufw default allow outgoing
   ufw allow ssh
@@ -81,8 +107,7 @@ if [[ "$ufw_choice" =~ ^[Yy]$ ]]; then
 fi
 
 # Fail2Ban
-read -p "[*] Enable Fail2Ban for SSH protection? (y/n): " f2b
-if [[ "$f2b" =~ ^[Yy]$ ]]; then
+if prompt_yes_no "[*] Enable Fail2Ban for SSH protection?"; then
   systemctl enable --now fail2ban
   summary["Fail2Ban"]="✓"
 fi
@@ -95,19 +120,18 @@ if [[ -f "$SCRIPT_DIR/fail2ban/jail.local" ]]; then
 fi
 
 # RKHunter
-read -p "[*] Initialize rkhunter properties DB now? (y/n): " rkh
-if [[ "$rkh" =~ ^[Yy]$ ]]; then
+if prompt_yes_no "[*] Initialize rkhunter properties DB now?"; then
   rkhunter --propupd -q || true
   summary["RKHunter DB Init"]="✓"
 fi
 
 # ClamAV DB
 echo -e "${BLUE}[*] Updating ClamAV virus database...${NC}"
+systemctl stop clamav-freshclam || true
 sudo -u clamav freshclam || true
 
 # clamd setup
-read -p "[*] Enable clamd daemon and socket? (y/n): " enable_clamd
-if [[ "$enable_clamd" =~ ^[Yy]$ ]]; then
+if prompt_yes_no "[*] Enable clamd daemon and socket?"; then
   chown -R clamav:clamav /var/lib/clamav /var/log/clamav
   systemctl unmask clamav-daemon.socket
   systemctl unmask clamav-daemon.service
@@ -121,37 +145,23 @@ if [[ "$enable_clamd" =~ ^[Yy]$ ]]; then
   fi
 fi
 
-# clamdscan test
-read -p "[*] Run test scan using clamdscan? (y/n): " testscan
-if [[ "$testscan" =~ ^[Yy]$ ]]; then
-  if clamdscan --fdpass /etc/hostname &>/dev/null; then
-    echo -e "${GREEN}[✓] clamdscan test succeeded.${NC}"
-    summary["clamdscan Test"]="✓"
-  else
-    echo -e "${RED}[!] clamdscan test failed.${NC}"
-  fi
-fi
-
 # Lynis system audit
-read -p "[*] Run Lynis system audit now? (y/n): " lynis_choice
-if [[ "$lynis_choice" =~ ^[Yy]$ ]]; then
+if prompt_yes_no "[*] Run Lynis system audit now?"; then
   echo -e "${BLUE}[*] Running Lynis audit...${NC}"
   LYNIS_OUT="$HOME/secure-linux-server/logs/lynis-report.txt"
   mkdir -p "$(dirname "$LYNIS_OUT")"
   lynis audit system --quiet > "$LYNIS_OUT" || true
   echo -e "${GREEN}[✓] Lynis report saved to: $LYNIS_OUT${NC}"
   summary["Lynis Audit"]="✓"
-else
-  summary["Lynis Audit"]="Skipped"
 fi
 
 # notify.sh prompt
-read -p "[*] Install notify.sh to default location? (y/n): " install_notify
-if [[ "$install_notify" =~ ^[Yy]$ ]]; then
+if prompt_yes_no "[*] Install notify.sh to default location?"; then
   NOTIFY_SRC="$SCRIPT_DIR/alerts/scripts/notify.sh"
   NOTIFY_DEST="$HOME/secure-linux-server/alerts/scripts/notify.sh"
   if [[ -f "$NOTIFY_DEST" ]]; then
     echo -e "${YELLOW}[!] notify.sh already exists, skipping copy.${NC}"
+    summary["notify.sh"]="✓ (Already Exists)"
   else
     mkdir -p "$(dirname "$NOTIFY_DEST")"
     cp "$NOTIFY_SRC" "$NOTIFY_DEST"
