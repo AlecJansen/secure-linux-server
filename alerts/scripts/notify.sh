@@ -14,8 +14,25 @@ if ! command -v msmtp &> /dev/null; then
   exit 1
 fi
 
+# Detect and use the original user's msmtp config even when running with sudo
+if [[ -n "${SUDO_USER:-}" && "$SUDO_USER" != "root" ]]; then
+  USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+  USER_HOME="$HOME"
+fi
+MSMTP_CONFIG="$USER_HOME/.msmtprc"
+
+if [[ ! -f "$MSMTP_CONFIG" ]]; then
+  echo "❌ Error: msmtp config not found at $MSMTP_CONFIG"
+  echo "   Please create it with your SMTP credentials."
+  echo "   See: https://github.com/secure-linux-server/secure-linux-server/wiki/Email-Alerts"
+  exit 1
+fi
+
 # Configuration
 EMAIL="alecjansen1@gmail.com"
+
+# Configuration
 HOSTNAME="voyd"
 LOG_DIR="$HOME/secure-linux-server/logs"
 DATE_TIME=$(date +%F_%H-%M-%S)
@@ -115,6 +132,7 @@ for status_file in "${STATUS_FILES[@]}"; do
   else
     statuses+=("FAIL")
   fi
+
 done
 echo ""
 
@@ -156,7 +174,7 @@ echo "[📤] Sending email report to $EMAIL..."
   echo "Content-Type: text/plain; charset=UTF-8"
   echo ""
   cat "$REPORT"
-} | msmtp --file="$HOME/.msmtprc" --account=gmail "$EMAIL"
+} | msmtp --file="$MSMTP_CONFIG" --account=gmail "$EMAIL"
 status=$?
 if [[ $status -eq 0 ]]; then
   echo "[📬] Email sent"
@@ -170,3 +188,33 @@ rm -f "${STATUS_FILES[@]}" 2>/dev/null || true
 # Exit code
 [[ "${statuses[*]}" =~ "FAIL" ]] && { echo "[⚠️ ] Scan(s) failed"; exit 1; }
 echo "[🏁] All scans completed successfully"
+
+# Offer to set up a Cron job for notify.sh if running interactively
+if [[ -t 1 && -t 0 ]]; then
+  echo -e "\n🛠️  Would you like to schedule automatic daily/weekly/monthly scans via cron?"
+  echo "   1) Daily at 8am (default)"
+  echo "   2) Weekly (Sunday 8am)"
+  echo "   3) Monthly (1st day 8am)"
+  read -rp "Select [1/2/3] or press Enter for daily: " schedule_choice
+
+  case "$schedule_choice" in
+    2)
+      cron_expr="0 8 * * 0"
+      human_sched="weekly (Sundays at 8am)"
+      ;;
+    3)
+      cron_expr="0 8 1 * *"
+      human_sched="monthly (1st at 8am)"
+      ;;
+    *)
+      cron_expr="0 8 * * *"
+      human_sched="daily (8am)"
+      ;;
+  esac
+
+  script_path="$(realpath "$0")"
+  (crontab -l 2>/dev/null; echo "$cron_expr bash \"$script_path\"") | sort | uniq | crontab -
+
+  echo -e "\n✅ Cron job set: $human_sched"
+  echo "   (To remove, run: crontab -e)"
+fi
