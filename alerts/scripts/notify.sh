@@ -61,7 +61,7 @@ if [[ $available_mb -lt $REQUIRED_SPACE_MB ]]; then
   exit 1
 fi
 
-printf "\n🔐 ========= Daily Security Scans ========= 🔐\n\n"
+printf "\n🔐 ========= Daily Security Scan ========= 🔐\n\n"
 echo "[💾] Disk space OK: ${available_gb}GB available"
 echo "[•] Starting scans..."
 
@@ -147,11 +147,22 @@ summary_block="🧾 Summary:\n   🛡 RKHUNTER   → ${statuses[0]}\n   🐛 CHK
   echo ""
 
   echo "📄 RKHUNTER Findings:"
-  awk '/^Warning:|^Found|.*[Tt]rojan/,/^$/' "${LOGS[0]}" | sed '/^$/q'
+  RKHUNTER_OUTPUT=$(awk '/^Warning:|^Found|.*[Tt]rojan/,/^$/' "${LOGS[0]}" | sed '/^$/q')
+  if [[ -z "$RKHUNTER_OUTPUT" ]]; then
+    echo "No warnings reported"
+  else
+    echo "$RKHUNTER_OUTPUT"
+  fi
   echo ""
 
   echo "📄 CHKROOTKIT Warnings:"
-  awk '/^WARNING:|\/usr\/|\/sbin\/|\/lib\// { print "• " $0 }' "${LOGS[1]}" || echo "No warnings reported"
+  CHKROOTKIT_WARNINGS=$(awk '/^WARNING:|\/usr\/|\/sbin\/|\/lib\// { print "• " $0 }' "${LOGS[1]}" | \
+    grep -vE "PACKET SNIFFER|twisted|fail2ban|\.htaccess|\.gitignore|\.document|\.build-id|No such file or directory")
+  if [[ -z "$CHKROOTKIT_WARNINGS" ]]; then
+    echo "No warnings reported"
+  else
+    echo "$CHKROOTKIT_WARNINGS"
+  fi
   echo ""
 
   echo "📄 CLAMDSCAN Issues:"
