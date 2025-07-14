@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# notify.sh - Daily security scan and email notifier
+# notify.sh - Daily security scan and email notifier (now with Quick/Full modes)
 
 set -euo pipefail
 umask 077
@@ -31,8 +31,6 @@ fi
 
 # Configuration
 EMAIL="alecjansen1@gmail.com"
-
-# Configuration
 HOSTNAME="voyd"
 LOG_DIR="$HOME/secure-linux-server/logs"
 DATE_TIME=$(date +%F_%H-%M-%S)
@@ -61,9 +59,52 @@ if [[ $available_mb -lt $REQUIRED_SPACE_MB ]]; then
   exit 1
 fi
 
+# -------------- Scan Mode Option --------------
+SCAN_MODE=""
+if [[ $# -gt 0 ]]; then
+  case "$1" in
+    --quick) SCAN_MODE="quick" ;;
+    --full)  SCAN_MODE="full" ;;
+    *) echo "Usage: $0 [--quick|--full]"; exit 1 ;;
+  esac
+fi
+
+# Interactive prompt if not set and in terminal
+if [[ -z "$SCAN_MODE" && -t 1 && -t 0 ]]; then
+  echo "Select scan mode:"
+  echo "  1) Quick (fast, recommended for daily use)"
+  echo "  2) Full (slow, deep, recommended weekly/monthly)"
+  read -rp "Choose [1/2] or press Enter for quick: " scan_choice
+  case "$scan_choice" in
+    2) SCAN_MODE="full" ;;
+    *) SCAN_MODE="quick" ;;
+  esac
+fi
+
+# Default to quick if not set
+SCAN_MODE="${SCAN_MODE:-quick}"
+
 printf "\n🔐 ========= Daily Security Scan ========= 🔐\n\n"
 echo "[💾] Disk space OK: ${available_gb}GB available"
+echo "[•] Scan mode: $SCAN_MODE"
 echo "[•] Starting scans..."
+# ---------------------------------------------
+
+# --------- SCAN COMMAND TEMPLATES ------------
+if [[ "$SCAN_MODE" == "full" ]]; then
+  # Full/Deep scan commands
+  RKHUNTER_CMD="sudo rkhunter --check --rwo --nocolors"
+  CHKROOTKIT_CMD="sudo chkrootkit"
+  # ClamAV: Scan everything (slow)
+  CLAMDSCAN_CMD="sudo clamdscan --fdpass /"
+else
+  # Quick scan commands
+  RKHUNTER_CMD="sudo rkhunter --check --rwo --nocolors"
+  CHKROOTKIT_CMD="sudo chkrootkit"
+  # ClamAV: Only check essential system dirs (edit as needed)
+  CLAMDSCAN_CMD="sudo clamdscan --fdpass /etc /usr /bin /sbin /boot"
+fi
+# ---------------------------------------------
 
 # Initialize status files
 for file in "${STATUS_FILES[@]}"; do echo "FAIL" > "$file"; done
@@ -72,7 +113,7 @@ for file in "${STATUS_FILES[@]}"; do echo "FAIL" > "$file"; done
 run_scan() {
   local tool=$1 cmd=$2 log=$3 status=$4
 
-  ( # Run inside subshell so PID can be tracked
+  (
     if timeout 900 nice -n 15 ionice -c 3 $cmd > "$log" 2>&1; then
       if [[ $tool == "rkhunter" ]]; then
         if grep -Eq '^Warning:|^Found|.*[Tt]rojan' "$log"; then
@@ -117,13 +158,13 @@ run_scan() {
 }
 
 # Launch scans
-run_scan "rkhunter" "sudo rkhunter --check --rwo --nocolors" "${LOGS[0]}" "${STATUS_FILES[0]}"
-run_scan "chkrootkit" "sudo chkrootkit" "${LOGS[1]}" "${STATUS_FILES[1]}"
-run_scan "clamdscan" "sudo clamdscan --fdpass $HOME" "${LOGS[2]}" "${STATUS_FILES[2]}"
+run_scan "rkhunter"   "$RKHUNTER_CMD"   "${LOGS[0]}" "${STATUS_FILES[0]}"
+run_scan "chkrootkit" "$CHKROOTKIT_CMD" "${LOGS[1]}" "${STATUS_FILES[1]}"
+run_scan "clamdscan"  "$CLAMDSCAN_CMD"  "${LOGS[2]}" "${STATUS_FILES[2]}"
 
 wait || true  # Don't fail if a background job was killed
 
-# Read scan results (wait a moment for file writes to complete)
+# Read scan results
 sleep 1
 statuses=()
 for status_file in "${STATUS_FILES[@]}"; do
@@ -132,20 +173,16 @@ for status_file in "${STATUS_FILES[@]}"; do
   else
     statuses+=("FAIL")
   fi
-
 done
 echo ""
 
-# Format summary
-summary_block="🧾 Summary:\n   🛡 RKHUNTER   → ${statuses[0]}\n   🐛 CHKROOTKIT → ${statuses[1]}\n   🧬 CLAMDSCAN  → ${statuses[2]}"
-
+# Format summary and append full logs only if WARN or FAIL
 {
   echo "🔒 Daily Security Scan Report for $HOSTNAME - $DATE_TIME"
   echo "============================================================"
   echo ""
-  echo -e "$summary_block"
+  echo -e "🧾 Summary:\n   🛡 RKHUNTER   → ${statuses[0]}\n   🐛 CHKROOTKIT → ${statuses[1]}\n   🧬 CLAMDSCAN  → ${statuses[2]}"
   echo ""
-
   echo "📄 RKHUNTER Findings:"
   RKHUNTER_OUTPUT=$(awk '/^Warning:|^Found|.*[Tt]rojan/,/^$/' "${LOGS[0]}" | sed '/^$/q')
   if [[ -z "$RKHUNTER_OUTPUT" ]]; then
@@ -154,7 +191,6 @@ summary_block="🧾 Summary:\n   🛡 RKHUNTER   → ${statuses[0]}\n   🐛 CHK
     echo "$RKHUNTER_OUTPUT"
   fi
   echo ""
-
   echo "📄 CHKROOTKIT Warnings:"
   CHKROOTKIT_WARNINGS=$(awk '/^WARNING:|\/usr\/|\/sbin\/|\/lib\// { print "• " $0 }' "${LOGS[1]}" | \
     grep -vE "PACKET SNIFFER|twisted|fail2ban|\.htaccess|\.gitignore|\.document|\.build-id|No such file or directory")
@@ -164,7 +200,6 @@ summary_block="🧾 Summary:\n   🛡 RKHUNTER   → ${statuses[0]}\n   🐛 CHK
     echo "$CHKROOTKIT_WARNINGS"
   fi
   echo ""
-
   echo "📄 CLAMDSCAN Issues:"
   if grep -qE 'Infected files: [1-9][0-9]*' "${LOGS[2]}"; then
     awk '/Infected files:/{p=1} p' "${LOGS[2]}"
@@ -173,6 +208,23 @@ summary_block="🧾 Summary:\n   🛡 RKHUNTER   → ${statuses[0]}\n   🐛 CHK
       grep -vE '(snap|docker|urandom|random|zero|netdata|not supported)' || echo "No notable warnings found"
   fi
   echo ""
+
+  # Include full logs for WARN/FAIL only
+  if [[ "${statuses[0]}" != "OK" ]]; then
+    echo "==== RKHUNTER FULL LOG ===="
+    cat "${LOGS[0]}"
+    echo ""
+  fi
+  if [[ "${statuses[1]}" != "OK" ]]; then
+    echo "==== CHKROOTKIT FULL LOG ===="
+    cat "${LOGS[1]}"
+    echo ""
+  fi
+  if [[ "${statuses[2]}" != "OK" ]]; then
+    echo "==== CLAMDSCAN FULL LOG ===="
+    cat "${LOGS[2]}"
+    echo ""
+  fi
 } > "$REPORT"
 
 # Email report
