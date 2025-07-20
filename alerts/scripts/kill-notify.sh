@@ -6,6 +6,9 @@ PATTERNS=(
   "rkhunter --check"
   "lynis audit system"
   "chkrootkit"
+  "clamscan"
+  "clamdscan"
+  "suricata"
 )
 
 echo "[!] Searching for notify.sh scan processes to terminate..."
@@ -14,7 +17,7 @@ for pattern in "${PATTERNS[@]}"; do
   pids=$(pgrep -f "$pattern")
   if [[ -n "$pids" ]]; then
     echo "[*] Killing processes matching: $pattern"
-    echo "$pids" | xargs sudo kill -9
+    echo "$pids" | xargs -r sudo kill -9
   else
     echo "[✓] No active processes found for: $pattern"
   fi

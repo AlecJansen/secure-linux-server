@@ -209,6 +209,21 @@ echo ""
   fi
   echo ""
 
+  # === SURICATA IDS ALERTS ===
+  SURICATA_LOG="/var/log/suricata/eve.json"
+  echo "📡 SURICATA IDS Alerts:" 
+  if [ -f "$SURICATA_LOG" ]; then
+      TODAY=$(date -u +"%Y-%m-%d")
+      jq -r --arg today "$TODAY" '
+        select(.event_type=="alert") |
+        select(.timestamp | startswith($today)) |
+        "[\(.timestamp)] \(.alert.signature) | src: \(.src_ip) → dst: \(.dest_ip) | Severity: \(.alert.severity)"
+      ' "$SURICATA_LOG" | tail -n 20 | sed 's/^/• /'
+  else
+      echo "• Suricata log not found"
+  fi
+  echo ""
+
   # Include full logs for WARN/FAIL only
   if [[ "${statuses[0]}" != "OK" ]]; then
     echo "==== RKHUNTER FULL LOG ===="

@@ -1,88 +1,114 @@
-# Secure Linux Server
+# Secure Linux Server Toolkit
 
-This project automates the initial hardening and monitoring setup for a personal or home-based Ubuntu server. It includes firewall configuration, security tools, scheduled scan alerts, and optional kernel module lockdown.
+A lightweight hardening and monitoring toolkit for personal/home Ubuntu servers. Automates the setup of essential security tools, firewall rules, kernel hardening, and daily threat reports.
 
-## Features
+## Key Features
 
-* UFW firewall configuration
-* Fail2Ban setup for SSH brute-force protection
-* Rootkit and malware scanners: RKHunter, Chkrootkit, ClamAV
-* Lynis security auditing
-* Daily email reports via `notify.sh`
-* Optional kernel module blacklist for hardening
-* Interactive `setup.sh` with logging and summary
+* UFW-based firewall initialization
+* Fail2Ban brute-force SSH protection
+* Rootkit and malware scanning: RKHunter, Chkrootkit, ClamAV
+* Lynis system auditing
+* Suricata IDS alert parsing (if installed)
+* Email-based scan reports with `notify.sh`
+* Optional kernel module blacklisting
+* Interactive setup via `setup.sh`
+* Log rotation, cron scheduling prompts, and update script
 
-## Prerequisites
+## Requirements
 
 * Ubuntu/Debian-based system
 * Internet connection
-* Run `setup.sh` with `sudo` or as root
+* `sudo` access
 
-## Setup
+## Quick Start
 
-Clone the repository:
-
-```
+```bash
 git clone https://github.com/alecjansen/secure-linux-server.git
 cd secure-linux-server
-```
-
-Run the setup:
-
-```
 sudo ./setup.sh
 ```
 
-The script will:
+The setup will:
 
-* Prompt for actions (system upgrade, firewall rules, scan tool setup)
-* Install essential packages:
+* Prompt for system upgrade, tool installs, and hardening steps
+* Configure and optionally run `lynis`, `rkhunter`, and `notify.sh`
+* Configure `msmtp` for email alerts
+* Offer to disable insecure kernel modules
+* Summarize results in `~/secure-linux-server/setup-summary-<DATE>.txt`
 
-  * `ufw`, `fail2ban`, `lynis`, `rkhunter`, `chkrootkit`, `clamav`, `clamav-daemon`, `unattended-upgrades`, `mailutils`, `msmtp`
-* Configure `msmtp` as the default MTA if available
-* Optionally copy `jail.local` for Fail2Ban if present
-* Offer to run Lynis audit
-* Prompt to install `notify.sh`
-* Optionally blacklist unused/risky kernel modules
+## Daily Scan and Email Alerts
 
-## Daily Scan and Notification
+To configure daily security scans with email:
 
-To set up daily email alerts:
+1. Ensure `msmtp` is installed and set up in `~/.msmtprc`.
 
-1. Ensure `msmtp` is configured in `~/.msmtprc`
-2. Edit your email in `alerts/scripts/notify.sh`
-3. Add a cron job:
+   * Example config: [https://github.com/secure-linux-server/secure-linux-server/wiki/Email-Alerts](https://github.com/secure-linux-server/secure-linux-server/wiki/Email-Alerts)
 
-   crontab -e
+2. Run `setup.sh` and provide your alert email when prompted.
 
-Add the following line:
+3. Verify `notify.sh` was installed to:
 
-```
-0 6 * * * $HOME/secure-linux-server/alerts/scripts/notify.sh
-```
+   ```
+   ~/secure-linux-server/alerts/scripts/notify.sh
+   ```
+
+4. Schedule a cron job (auto-prompted on first run), or manually:
+
+   ```cron
+   0 8 * * * bash $HOME/secure-linux-server/alerts/scripts/notify.sh --quick
+   ```
 
 The script:
 
-* Runs `rkhunter`, `chkrootkit`, and `clamdscan` with timeout, low IO priority
-* Logs results to `~/secure-linux-server/logs/`
-* Cleans logs older than 14 days
-* Sends a unified report to your email with tool statuses and relevant findings
+* Runs `rkhunter`, `chkrootkit`, and `clamdscan` with resource limits
+* Summarizes findings, includes Suricata alerts (if present)
+* Emails a report (via `msmtp`) and logs everything to:
 
-## Kernel Module Blacklisting
+  ```
+  ~/secure-linux-server/logs/
+  ```
 
-`setup.sh` allows optional disabling of risky or unused kernel modules (e.g., `usb-storage`, `dccp`, `sctp`). This adds entries to `/etc/modprobe.d/hardened-blacklist.conf`.
+## Update Script
 
-## Logs
+To regularly update system and security tools:
 
-All logs are saved in:
+```bash
+sudo ./update.sh
+```
+
+Performs:
+
+* APT upgrade, autoremove, and cleanup
+* Lynis update, ClamAV DB refresh
+* RKHunter and Suricata rule updates (if present)
+* Fail2Ban and UFW reloads
+* Summary saved to `/var/log/secure-linux-server/`
+
+## Optional Kernel Hardening
+
+`setup.sh` offers optional disabling of risky or unused modules, like:
+
+* `usb-storage`, `dccp`, `sctp`, `firewire-core`
+* Config saved to: `/etc/modprobe.d/hardened-blacklist.conf`
+
+## Directory Layout
 
 ```
-~/secure-linux-server/logs/
+secure-linux-server/
+├── setup.sh            # Main interactive setup
+├── update.sh           # Patch/update utility
+├── alerts/scripts/notify.sh  # Daily scan/report script
+├── logs/               # All generated logs
+└── config/             # alert.conf stores your email
 ```
 
-## Contributions
+## Contributing
 
-Pull requests and issues welcome. Lightweight, security-conscious additions are preferred.
+Pull requests are welcome! Focus on:
+
+* Lightweight improvements
+* Simplicity, performance, and clarity
+* Avoiding dependencies unless strictly necessary
 
 ## License
 
